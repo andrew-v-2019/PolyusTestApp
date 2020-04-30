@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
 
@@ -9,35 +10,34 @@ namespace PolyusTestApp.Sender
     public partial class SenderServiceInstaller : Installer
     {
         private const string ServiceName = "PolyusTestApp.SenderWindowsService";
-
+        readonly ServiceInstaller _serviceInstaller;
         public SenderServiceInstaller()
         {
             InitializeComponent();
-            var serviceInstaller = new ServiceInstaller();
+            _serviceInstaller = new ServiceInstaller();
             var processInstaller = new ServiceProcessInstaller
             {
                 Account = ServiceAccount.NetworkService
             };
 
-            serviceInstaller.StartType = ServiceStartMode.Automatic;
-            serviceInstaller.DelayedAutoStart = false;
+            _serviceInstaller.StartType = ServiceStartMode.Automatic;
+            _serviceInstaller.DelayedAutoStart = false;
 
-            serviceInstaller.DisplayName = ServiceName;
+            _serviceInstaller.DisplayName = ServiceName;
 
-            serviceInstaller.ServiceName = ServiceName;
+            _serviceInstaller.ServiceName = ServiceName;
             Installers.Add(processInstaller);
-            Installers.Add(serviceInstaller);
+            Installers.Add(_serviceInstaller);
 
             InitializeComponent();
-
-            AfterInstall += SenderServiceInstaller_AfterInstall;
         }
 
-        private static void SenderServiceInstaller_AfterInstall(object sender, InstallEventArgs e)
+        protected override void OnAfterInstall(IDictionary savedState)
         {
-            using (var sc = new ServiceController(ServiceName))
+            base.OnAfterInstall(savedState);
+            using (var serviceController = new ServiceController(_serviceInstaller.ServiceName))
             {
-                sc.Start();
+                serviceController.Start();
             }
         }
     }

@@ -7,25 +7,24 @@ namespace PolyusTestApp.Sender
         
         static void Main()
         {
-            //#if(!DEBUG)
-            //            ServiceBase[] ServicesToRun;
-            //            ServicesToRun = new ServiceBase[]
-            //            {
-            //                new Sender()
-            //            };
-            //            ServiceBase.Run(ServicesToRun);
+            //#if (!DEBUG)
+            //                        ServiceBase[] ServicesToRun;
+            //                        ServicesToRun = new ServiceBase[]
+            //                        {
+            //                            new Sender()
+            //                        };
+            //                        ServiceBase.Run(ServicesToRun);
             //#else
             //            var debugService = new Sender();
             //            debugService.Process();
             //#endif
-
-
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            Logger.Logger.Log("Main method");
+           
+            var servicesToRun = new ServiceBase[]
             {
                 new Sender()
             };
-            ServiceBase.Run(ServicesToRun);
+            ServiceBase.Run(servicesToRun);
         }
     }
 }

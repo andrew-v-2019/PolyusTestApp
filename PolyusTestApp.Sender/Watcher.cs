@@ -1,24 +1,29 @@
-﻿using System;
+﻿using PolyusTestApp.Models;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace PolyusTestApp.Sender
 {
     public class Watcher
     {
-        private readonly Logger.Logger _logger;
-        private FileSystemWatcher FileSystemWatcher { get; }
+        private FileSystemWatcherRegEx FileSystemWatcher { get; }
 
-        bool _enabled = true;
+        public delegate void FileActionHandler(FileActionData fileActionData);
 
-        public Watcher(string path, string mask, Logger.Logger logger)
+        public event FileActionHandler FileActionEvent;
+
+        private bool _enabled = true;
+
+        public Watcher(string path, string mask)
         {
-            _logger = logger;
-            FileSystemWatcher = new FileSystemWatcher(path);
-
-            FileSystemWatcher.NotifyFilter = NotifyFilters.LastAccess
-                                             | NotifyFilters.LastWrite
-                                             | NotifyFilters.FileName;
+            var regEx = new Regex(mask);
+            FileSystemWatcher = new FileSystemWatcherRegEx(path, regEx)
+            {
+                NotifyFilter = NotifyFilters.LastAccess
+                               | NotifyFilters.LastWrite
+                               | NotifyFilters.FileName
+            };
 
 
             FileSystemWatcher.Deleted += Deleted;
@@ -29,10 +34,10 @@ namespace PolyusTestApp.Sender
 
         public void Start()
         {
-            _logger.Log("FileSystemWatcher started");
+            Logger.Logger.Log("FileSystemWatcher started");
             FileSystemWatcher.EnableRaisingEvents = true;
 
-            while(_enabled)
+            while (_enabled)
             {
                 Thread.Sleep(1000);
             }
@@ -40,35 +45,57 @@ namespace PolyusTestApp.Sender
 
         public void Stop()
         {
-            _logger.Log("FileSystemWatcher stopped");
+            Logger.Logger.Log("FileSystemWatcher stopped");
             FileSystemWatcher.EnableRaisingEvents = false;
             _enabled = false;
             FileSystemWatcher.Dispose();
         }
 
-
         private void Renamed(object sender, RenamedEventArgs e)
         {
             var message = $"{e.OldFullPath} renamed to {e.FullPath}";
-            _logger.Log(message);
+            Logger.Logger.Log(message);
+            InvokeFileActionEvent(FileActionType.ChangeName, e.OldName, e.Name);
         }
 
         private void Changed(object sender, FileSystemEventArgs e)
         {
             var message = $"{e.FullPath} was edited";
-            _logger.Log(message);
+            Logger.Logger.Log(message);
+            InvokeFileActionEvent(FileActionType.Update, e.Name);
         }
 
         private void Created(object sender, FileSystemEventArgs e)
         {
             var message = $"{e.FullPath} was created";
-            _logger.Log(message);
+            Logger.Logger.Log(message);
+
+            InvokeFileActionEvent(FileActionType.Create, e.Name);
         }
 
         private void Deleted(object sender, FileSystemEventArgs e)
         {
             var message = $"{e.FullPath} was removed";
-            _logger.Log(message);
+            Logger.Logger.Log(message);
+            InvokeFileActionEvent(FileActionType.Delete, e.Name);
+        }
+
+        private void InvokeFileActionEvent(FileActionType type, string fullName, string newName = null)
+        {
+            var data = CreateFileActionData(type, fullName, newName);
+            FileActionEvent?.Invoke(data);
+        }
+
+        private static FileActionData CreateFileActionData(FileActionType type, string fileName, string newName = null)
+        {
+            var data = new FileActionData
+            {
+                FileActionType = type,
+                FileName = fileName,
+                NewFileName = newName
+            };
+
+            return data;
         }
     }
 }

@@ -1,30 +1,49 @@
 ﻿using System;
 using System.IO;
+using PolyusTestApp.Common;
 
 namespace PolyusTestApp.Logger
 {
-    public class Logger
+    public static class Logger
     {
-        private readonly string _logFileFullName;
-        private readonly object _lck = new object();
+        public static readonly string LogFileFullName;
+        private static readonly object Lck = new object();
 
-        public Logger(string logFileFullName)
+
+        static Logger()
         {
-            _logFileFullName = logFileFullName;
+            LogFileFullName = GetLogFileName();
         }
 
-        public void Log(string message)
+        private static void CreateLogFolder(string folder)
         {
-            lock (_lck)
-            {
+            var di = new DirectoryInfo(folder);
+            if (di.Exists)
+                return;
 
-                using (var writer = new StreamWriter(_logFileFullName, true))
+            di.Create();
+        }
+
+        public static void Log(string message)
+        {
+            lock (Lck)
+            {
+                using (var writer = new StreamWriter(LogFileFullName, true))
                 {
                     var date = DateTime.Now;
                     writer.WriteLine($"{date}: {message}");
                     writer.Flush();
                 }
             }
+        }
+
+        private static string GetLogFileName()
+        {
+            var path = AppDomain.CurrentDomain.BaseDirectory+"log/";
+            CreateLogFolder(path);
+            var date = DateTime.Now.FormatDateForFileName();
+            var res = $"{path}log-{date}.txt";
+            return res;
         }
     }
 }

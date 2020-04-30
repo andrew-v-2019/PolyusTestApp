@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration.Install;
 using System.ServiceProcess;
 
@@ -10,6 +12,8 @@ namespace PolyusTestApp.Receiver
     {
         ServiceInstaller serviceInstaller;
         ServiceProcessInstaller processInstaller;
+
+        private const string ServiceName = "PolyusTestApp.ReceiverWindowsService";
 
         public Installer()
         {
@@ -23,20 +27,30 @@ namespace PolyusTestApp.Receiver
             serviceInstaller.StartType = ServiceStartMode.Automatic;
             serviceInstaller.DelayedAutoStart = false;
 
-            serviceInstaller.DisplayName = "PolyusTestApp.ReceiverWindowsService";
+            serviceInstaller.DisplayName = ServiceName;
 
-            serviceInstaller.ServiceName = "PolyusTestApp.ReceiverWindowsService";
+            serviceInstaller.ServiceName = ServiceName;
             Installers.Add(processInstaller);
             Installers.Add(serviceInstaller);
 
-            AfterInstall += Installer_AfterInstall;
+                // AfterInstall += Installer_AfterInstall;
         }
 
-        private static void Installer_AfterInstall(object sender, InstallEventArgs e)
+        //private static void Installer_AfterInstall(object sender, InstallEventArgs e)
+        //{
+        //    var serviceInstaller = (ServiceInstaller)sender;
+        //    using (var sc = new ServiceController(serviceInstaller.ServiceName))
+        //    {
+        //        sc.Start();
+        //    }
+        //}
+
+        protected override void OnAfterInstall(IDictionary savedState)
         {
-            using (var sc = new ServiceController("PolyusTestApp.ReceiverWindowsService"))
+            base.OnAfterInstall(savedState);
+            using (var serviceController = new ServiceController(serviceInstaller.ServiceName))
             {
-                sc.Start();
+                serviceController.Start();
             }
         }
     }

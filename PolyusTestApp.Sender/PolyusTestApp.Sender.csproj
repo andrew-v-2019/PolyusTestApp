@@ -33,9 +33,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileSystemWatcherRegEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ReceiverService.cs" />
     <Compile Include="SenderServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -65,15 +72,26 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PolyusTestApp.Common\PolyusTestApp.Common.csproj">
+      <Project>{38354FDE-2696-4297-8F20-EE4DD543E5E9}</Project>
+      <Name>PolyusTestApp.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PolyusTestApp.Logger\PolyusTestApp.Logger.csproj">
       <Project>{4ED22A9E-7F1F-4FED-B74D-EDEF08A2F021}</Project>
       <Name>PolyusTestApp.Logger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PolyusTestApp.Models\PolyusTestApp.Models.csproj">
+      <Project>{FD05F978-5E2C-4FD7-A5FC-1E587896E89E}</Project>
+      <Name>PolyusTestApp.Models</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Sender.resx">
       <DependentUpon>Sender.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
