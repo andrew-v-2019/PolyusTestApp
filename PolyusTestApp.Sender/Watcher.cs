@@ -17,13 +17,24 @@ namespace PolyusTestApp.Sender
 
         public Watcher(string path, string mask)
         {
-            var regEx = new Regex(mask);
-            FileSystemWatcher = new FileSystemWatcherRegEx(path, regEx)
+            if (!string.IsNullOrWhiteSpace(mask))
             {
-                NotifyFilter = NotifyFilters.LastAccess
-                               | NotifyFilters.LastWrite
-                               | NotifyFilters.FileName
-            };
+                var regEx = new Regex(mask);
+                FileSystemWatcher = new FileSystemWatcherRegEx(path, regEx)
+                {
+                    NotifyFilter = NotifyFilters.LastAccess
+                                   | NotifyFilters.LastWrite
+                                   | NotifyFilters.FileName
+                };
+            }
+            else {
+                FileSystemWatcher = new FileSystemWatcherRegEx(path)
+                {
+                    NotifyFilter = NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName
+                };
+            }
 
 
             FileSystemWatcher.Deleted += Deleted;
