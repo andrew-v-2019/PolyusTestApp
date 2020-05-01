@@ -31,6 +31,7 @@ namespace PolyusTestApp.Sender
             EventLog.WriteEntry("Process method");
             EventLog.WriteEntry("logFileName = " + Logger.Logger.LogFileFullName);
             _syncFolder = ConfigurationManager.AppSettings["SyncFolder"];
+            _fileService.CreateFolder(_syncFolder);
             var mask = ConfigurationManager.AppSettings["Mask"];
             _watcher = new Watcher(_syncFolder, mask);
             var thread = new Thread(_watcher.Start);
