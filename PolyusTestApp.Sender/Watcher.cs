@@ -17,7 +17,7 @@ namespace PolyusTestApp.Sender
 
         public Watcher(string path, string mask)
         {
-            if (!string.IsNullOrEmpty(mask))
+            if (!string.IsNullOrWhiteSpace(mask))
             {
                 var regEx = new Regex(mask);
 
